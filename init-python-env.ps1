@@ -174,4 +174,45 @@ Generate-DesktopShortcut `
     -WorkingDirectory $PROJECTS_PATH\$JUPYTER_STARTER_KIT_REPO
 
 Write-Host -ForegroundColor Green "Jupyter shortcuts ready!"
+
+# ----------------------------------------------------------------------------
+# ----------------------- create jupyter shortcuts ---------------------------
+# ----------------------------------------------------------------------------
+# Display dialog box for new starters
+# ---------------------------------------------------------------------------- 
+Add-Type -AssemblyName System.Windows.Forms
+
+$form = New-Object System.Windows.Forms.Form
+$form.Text = 'Info'
+$form.Size = New-Object System.Drawing.Size(300,200)
+$form.StartPosition = 'WindowsDefaultLocation'
+
+$label = New-Object System.Windows.Forms.Label
+$label.Location = New-Object System.Drawing.Point(10,20)
+$label.Size = New-Object System.Drawing.Size(280, 40) 
+$label.Text = "Look for the jupyter shortcuts on your Desktop. If you are new I suggest launching the jupyter-starter-kit-demo shortcut!"
+
+$buttonHeight = 23
+$buttonWidth = 100
+$buttonX = ($form.ClientSize.Width - $buttonWidth) / 2
+$buttonY = $form.ClientSize.Height - $buttonHeight - 10
+
+$button = New-Object System.Windows.Forms.Button
+$button.Location = New-Object System.Drawing.Point($buttonX, $buttonY)
+$button.Size = New-Object System.Drawing.Size($buttonWidth,$buttonHeight)
+$button.Text = 'Launch Shortcut'
+
+$button.Add_Click({
+    $shortcutPath = "$env:USERPROFILE\Desktop\jupyter-starter-kit-demo.lnk" 
+    if (Test-Path $shortcutPath) {
+        Start-Process $shortcutPath
+    } else {
+        [System.Windows.Forms.MessageBox]::Show("Shortcut not found.", "Error", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
+    }
+})
+
+$form.Controls.Add($label)
+$form.Controls.Add($button)
+$form.ShowDialog()
+
 exit
