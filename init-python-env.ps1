@@ -2,10 +2,23 @@
 # -------------------------------- set up ------------------------------------
 # ----------------------------------------------------------------------------
 # 1. allow script execution
-# 2. create projects directory 
-# 3. clone python environment set up repository
+# 2. install chocolatey package manager
+# 3. install git
+# 4. create projects directory 
+# 5. clone python environment set up repository
 # ---------------------------------------------------------------------------- 
-Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy Unrestricted -Force
+Set-ExecutionPolicy Bypass -Scope Process -Force
+
+Write-Host -ForegroundColor Green "Installing $PROJECTS_PATH chocolatey package manager ..."
+Unblock-File -Path 'C:\Users\WDAGUtilityAccount\analytics-env-set-up\init-python-env.ps1'
+[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
+iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
+Write-Host -ForegroundColor Green "chocolatey installed created!"
+
+Write-Host -ForegroundColor Yellow "Installing git via  chocolatey..."
+choco install git -y
+$env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
+Write-Host -ForegroundColor Green "git installed!"
 
 $PROJECTS_PATH = "$HOME\projects"
 $PYTHON_ENV_SET_UP_REPO = "analytics-env-set-up"
@@ -14,7 +27,7 @@ $JUPYTER_STARTER_KIT_REPO = "jupyter-starter-kit"
 if (-Not (Test-Path -Path $PROJECTS_PATH)) {
     Write-Host -ForegroundColor Green "Creating $PROJECTS_PATH directory ..."
     New-Item -Path $PROJECTS_PATH -ItemType Directory
-    Write-Host -ForegroundColor Yellow "Directory $PROJECTS_PATH created!"
+    Write-Host -ForegroundColor Green "Directory $PROJECTS_PATH created!"
 } else {
     Write-Host -ForegroundColor Yellow "Directory $PROJECTS_PATH already exists!"
 }
@@ -22,7 +35,7 @@ if (-Not (Test-Path -Path $PROJECTS_PATH)) {
 if (-Not (Test-Path -Path "$PROJECTS_PATH\$PYTHON_ENV_SET_UP_REPO")) {
     Write-Host -ForegroundColor Yellow "Cloning $PYTHON_ENV_SET_UP_REPO ..."
     Set-Location $PROJECTS_PATH
-    git clone https://analytics-vm-user@bitbucket.org/ghb-credit-risk/$PYTHON_ENV_SET_UP_REPO.git
+    git clone https://github.com/specialkapa/$PYTHON_ENV_SET_UP_REPO.git
     Write-Host -ForegroundColor Green "Cloned successfully!"
 } else {
     Write-Host -ForegroundColor Green "Local $PYTHON_ENV_SET_UP_REPO repo already exists!"
@@ -55,12 +68,14 @@ Invoke-WebRequest https://www.python.org/ftp/python/3.11.2/python-3.11.2-amd64.e
 Start-Process -Wait -FilePath "python-3.11.2-amd64.exe" -ArgumentList "/quiet InstallAllUsers=1 PrependPath=1"
 Remove-Item "python-3.11.2-amd64.exe"
 Write-Host -ForegroundColor Green "python 3.11.2 installed!"
+$env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
 
 $pythonExecutable = (Get-Command python | Select-Object -Property Source).Source
 $pythonPath = (Get-Item $pythonExecutable).DirectoryName
 
 Write-Host "Setting Python 3.11.2 as the global Python version..."
 $env:Path = "$pythonPath;$pythonPath\Scripts;" + $env:Path
+$env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
 
 # ----------------------------------------------------------------------------
 # ----------------------- install python packages ----------------------------
@@ -100,7 +115,7 @@ if ( (Test-Path -Path $PROJECTS_PA"$PROJECTS_PATH\$JUPYTER_STARTER_KIT_REPO")) {
     Remove-Item -Path "$PROJECTS_PATH\$JUPYTER_STARTER_KIT_REPO" -Recurse -Force
 }
 Write-Host -ForegroundColor Yellow "Cloning $JUPYTER_STARTER_KIT_REPO ..."
-git clone https://analytics-vm-user@bitbucket.org/ghb-credit-risk/$JUPYTER_STARTER_KIT_REPO.git
+git clone https://github.com/specialkapa/$JUPYTER_STARTER_KIT_REPO.git
 Write-Host -ForegroundColor Green "Cloned successfully!"
 
 # ----------------------------------------------------------------------------
